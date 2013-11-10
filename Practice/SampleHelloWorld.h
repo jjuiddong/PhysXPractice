@@ -49,7 +49,7 @@
 		virtual void							collectInputEvents(std::vector<const SampleFramework::InputEvent*>& inputEvents);
 		virtual void							helpRender(PxU32 x, PxU32 y, PxU8 textAlpha);
 		virtual	void							descriptionRender(PxU32 x, PxU32 y, PxU8 textAlpha);
-		virtual PxU32							getDebugObjectTypes() const;
+		virtual PxU32						getDebugObjectTypes() const;
 	};
 
 #endif
