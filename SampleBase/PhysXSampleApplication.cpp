@@ -744,7 +744,7 @@ void PhysXSampleApplication::onRender()
 		{
 			renderer->queueLightForRender(*mLights[i]);
 		}
-		if ( mSample->getPhysics().getPvdConnectionManager() )
+		if (mSample && mSample->getPhysics().getPvdConnectionManager() )
 		{
 			PxVec3 camPos( mCamera.getPos() );
 			PxVec3 camDir = mCamera.getViewDir();
@@ -755,14 +755,18 @@ void PhysXSampleApplication::onRender()
 
 		// main scene render
 		{
-			mSample->render();
+			if (mSample)
+				mSample->render();
 			renderer->render(mCamera.getViewMatrix(), mCamera.getProjMatrix());
 		}
 
 		// render debug lines and points with a small depth bias to avoid z-fighting
 		{
-			mSample->getDebugRenderer()->queueForRenderLine();
-			mSample->getDebugRenderer()->queueForRenderPoint();
+			if (mSample)
+			{
+				mSample->getDebugRenderer()->queueForRenderLine();
+				mSample->getDebugRenderer()->queueForRenderPoint();
+			}
 
 			// modify entry(3,3) of the projection matrix according to 
 			// http://www.terathon.com/gdc07_lengyel.pdf
@@ -873,11 +877,13 @@ void PhysXSampleApplication::onRender()
 		{
 			if (mShowExtendedHelp)
 			{
-				mSample->showExtendedInputEventHelp(x,y);
+				if (mSample)
+					mSample->showExtendedInputEventHelp(x,y);
 			}
 			else
 			{
 				//print minimal information
+				if (mRunning)
 				{
 					const RendererColor highlightTextColor(255, 255, 0, 255);
 					mRunning->getPathName(strbuf, sizeof strbuf - 1, true);
@@ -899,7 +905,8 @@ void PhysXSampleApplication::onRender()
 					y+=yInc;
 				}
 
-				mSample->descriptionRender(x, y+=yInc, PxU8(mTextAlphaDesc*255.0f));
+				if (mSample)
+					mSample->descriptionRender(x, y+=yInc, PxU8(mTextAlphaDesc*255.0f));
 				
 				//print help
 				if (mTextAlphaHelp != 0.0f)
@@ -918,14 +925,16 @@ void PhysXSampleApplication::onRender()
 						renderer->print(x, y += yInc, msg, scale, shadowOffset, textColor);
 
 					//print sample specific help
-					mSample->helpRender(x, y += yInc, PxU8(mTextAlphaHelp*255.0f));
+					if (mSample)
+						mSample->helpRender(x, y += yInc, PxU8(mTextAlphaHelp*255.0f));
 				}
 			}
 		}
 
 		// PT: "customizeRender" is NOT just for text render, it's a generic render callback that should be called all the time,
 		// not just when "mTextAlpha" isn't 0.0
-		mSample->customizeRender();
+		if (mSample)
+			mSample->customizeRender();
 
 #ifdef RENDERER_TABLET
 		if(mDrawScreenQuad)
@@ -941,7 +950,8 @@ void PhysXSampleApplication::onRender()
 #endif
 	}
 
-	mSample->displayFPS();
+	if (mSample)
+		mSample->displayFPS();
 
 	if(isConsoleActive())
 		mConsole->render(getRenderer());

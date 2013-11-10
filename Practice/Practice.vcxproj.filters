@@ -6,9 +6,11 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="SampleHelloWorld.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SampleHelloWorld.cpp" />
   </ItemGroup>
 </Project>
