@@ -91,7 +91,7 @@
       </AdditionalOptions>
       <AdditionalDependencies>cuda.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)DEBUG.lib</OutputFile>
-      <AdditionalLibraryDirectories>./../../../../../externals/CUDA/5.0.35/lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(PHYSX_DIR)externals/CUDA/5.0.35/lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(OutDir)/$(ProjectName)DEBUG.lib.pdb</ProgramDatabaseFile>
       <TargetMachine>MachineX86</TargetMachine>
     </Lib>
