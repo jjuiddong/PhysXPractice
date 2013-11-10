@@ -107,10 +107,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PxToolkit\compiler\vc10win32\PxToolkit.vcxproj">
-      <Project>{9e7e23b4-436d-1364-0655-59399e15c7ce}</Project>
+      <Project>{297b87d3-0d0c-9f5b-347b-708882e94af9}</Project>
     </ProjectReference>
     <ProjectReference Include="..\SampleBase\compiler\vc10win32\SampleBase.vcxproj">
-      <Project>{a37c7358-6e3d-362c-b722-0355fac34142}</Project>
+      <Project>{32ca1d72-b281-0440-c8bd-65b377832668}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
