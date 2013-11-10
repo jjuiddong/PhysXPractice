@@ -57,7 +57,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'">
-    <OutDir>./../../lib/win32\</OutDir>
+    <OutDir>./../../../lib/win32\</OutDir>
     <IntDir>./Win32/SampleBase/debug\</IntDir>
     <TargetExt>.lib</TargetExt>
     <TargetName>$(ProjectName)DEBUG</TargetName>

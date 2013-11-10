@@ -277,10 +277,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\targa.cpp" />
     <ClCompile Include="..\..\src\windows\WindowsSampleAssetManager.cpp">
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\targa.h" />
     <ClInclude Include="..\..\src\nv_dds.h">
     </ClInclude>
     <ClCompile Include="..\..\src\nv_dds.cpp">
