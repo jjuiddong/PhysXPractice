@@ -319,13 +319,13 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\SampleFramework\framework\compiler\vc10win32\SampleFramework-MT.vcxproj">
-      <Project>{d12d8bee-7ed6-f965-9f23-41aed87ed653}</Project>
+      <Project>{21f78de3-4025-697a-a7e2-da9e4845425c}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\SampleFramework\platform\compiler\vc10win32\SamplePlatform-MT.vcxproj">
-      <Project>{68cd4e51-9d88-8d65-d1df-a52f4c2dd225}</Project>
+      <Project>{4ec307c2-24a9-3614-415a-4a86cff3b389}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\SampleFramework\renderer\compiler\vc10win32\SampleRenderer-MT.vcxproj">
-      <Project>{c7570b01-54a9-33b4-9e38-bd21ce37b11d}</Project>
+      <Project>{e7f3509a-6f00-5b15-be06-4ed137505aa6}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
