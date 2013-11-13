@@ -7,6 +7,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SamplePlatform-MT", "..\..\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleRenderer-MT", "..\..\SampleFramework\renderer\compiler\vc10win64\SampleRenderer-MT.vcxproj", "{05CF423A-0F88-5BAE-9299-B23FFFE06CED}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PxToolkit", "..\..\PxToolkit\compiler\vc10win64\PxToolkit.vcxproj", "{81B24F5F-CC0B-C514-9C83-4E05CCC96711}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleBase", "..\..\SampleBase\compiler\vc10win64\SampleBase.vcxproj", "{CB76C815-011E-8AC4-0583-F0A661EB6E16}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		checked|x64 = checked|x64
@@ -39,6 +43,22 @@ Global
 		{05CF423A-0F88-5BAE-9299-B23FFFE06CED}.profile|x64.Build.0 = profile|x64
 		{05CF423A-0F88-5BAE-9299-B23FFFE06CED}.release|x64.ActiveCfg = release|x64
 		{05CF423A-0F88-5BAE-9299-B23FFFE06CED}.release|x64.Build.0 = release|x64
+		{81B24F5F-CC0B-C514-9C83-4E05CCC96711}.checked|x64.ActiveCfg = checked|x64
+		{81B24F5F-CC0B-C514-9C83-4E05CCC96711}.checked|x64.Build.0 = checked|x64
+		{81B24F5F-CC0B-C514-9C83-4E05CCC96711}.debug|x64.ActiveCfg = debug|x64
+		{81B24F5F-CC0B-C514-9C83-4E05CCC96711}.debug|x64.Build.0 = debug|x64
+		{81B24F5F-CC0B-C514-9C83-4E05CCC96711}.profile|x64.ActiveCfg = profile|x64
+		{81B24F5F-CC0B-C514-9C83-4E05CCC96711}.profile|x64.Build.0 = profile|x64
+		{81B24F5F-CC0B-C514-9C83-4E05CCC96711}.release|x64.ActiveCfg = release|x64
+		{81B24F5F-CC0B-C514-9C83-4E05CCC96711}.release|x64.Build.0 = release|x64
+		{CB76C815-011E-8AC4-0583-F0A661EB6E16}.checked|x64.ActiveCfg = checked|x64
+		{CB76C815-011E-8AC4-0583-F0A661EB6E16}.checked|x64.Build.0 = checked|x64
+		{CB76C815-011E-8AC4-0583-F0A661EB6E16}.debug|x64.ActiveCfg = debug|x64
+		{CB76C815-011E-8AC4-0583-F0A661EB6E16}.debug|x64.Build.0 = debug|x64
+		{CB76C815-011E-8AC4-0583-F0A661EB6E16}.profile|x64.ActiveCfg = profile|x64
+		{CB76C815-011E-8AC4-0583-F0A661EB6E16}.profile|x64.Build.0 = profile|x64
+		{CB76C815-011E-8AC4-0583-F0A661EB6E16}.release|x64.ActiveCfg = release|x64
+		{CB76C815-011E-8AC4-0583-F0A661EB6E16}.release|x64.Build.0 = release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
