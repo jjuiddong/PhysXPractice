@@ -1,31 +1,3 @@
-// This code contains NVIDIA Confidential Information and is disclosed to you
-// under a form of NVIDIA software license agreement provided separately to you.
-//
-// Notice
-// NVIDIA Corporation and its licensors retain all intellectual property and
-// proprietary rights in and to this software and related documentation and
-// any modifications thereto. Any use, reproduction, disclosure, or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA Corporation is strictly prohibited.
-//
-// ALL NVIDIA DESIGN SPECIFICATIONS, CODE ARE PROVIDED "AS IS.". NVIDIA MAKES
-// NO WARRANTIES, EXPRESSED, IMPLIED, STATUTORY, OR OTHERWISE WITH RESPECT TO
-// THE MATERIALS, AND EXPRESSLY DISCLAIMS ALL IMPLIED WARRANTIES OF NONINFRINGEMENT,
-// MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE.
-//
-// Information and code furnished is believed to be accurate and reliable.
-// However, NVIDIA Corporation assumes no responsibility for the consequences of use of such
-// information or for any infringement of patents or other rights of third parties that may
-// result from its use. No license is granted by implication or otherwise under any patent
-// or patent rights of NVIDIA Corporation. Details are subject to change without notice.
-// This code supersedes and replaces all information previously supplied.
-// NVIDIA Corporation products are not authorized for use as critical
-// components in life support devices or systems without express written approval of
-// NVIDIA Corporation.
-//
-// Copyright (c) 2008-2013 NVIDIA Corporation. All rights reserved.
-// Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
-// Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
 #include "stdafx.h"
 #include "SamplePreprocessor.h"
@@ -115,7 +87,7 @@ static void gImport(Console* console, const char* text, void* userData)
 
 void SampleHelloWorld::onInit()
 {
-	if(getConsole())
+	if (getConsole())
 	{
 		getConsole()->addCmd("value", gValue);
 		getConsole()->addCmd("export", gExport);
@@ -128,7 +100,41 @@ void SampleHelloWorld::onInit()
 	mApplication.setMouseCursorRecentering(true);
 	mCameraController.init(PxVec3(0.0f, 10.0f, 0.0f), PxVec3(0.0f, 0.0f, 0.0f));
 	mCameraController.setMouseSensitivity(0.5f);
+
+
+	PxRigidDynamic* actor1 = NULL;
+	const PxVec3 pos = getCamera().getPos();
+	const PxVec3 vel = getCamera().getViewDir() * getDebugObjectsVelocity();
+	actor1 = createSphere(pos, getDebugSphereObjectRadius(), &vel, mManagedMaterials[MATERIAL_GREEN], mDefaultDensity);
+
+	PxRigidDynamic* actor2 = NULL;
+	PxVec3 pos2 = getCamera().getPos();
+	pos2.x += 1.f;
+	actor2 = createSphere(pos2, getDebugSphereObjectRadius(), &vel, mManagedMaterials[MATERIAL_GREEN], mDefaultDensity);
+
+
+	// Joint Test
+	const float scale = 1.f;
+	const float plankDepth = 2.f;
+	//PxRevoluteJoint* j = PxRevoluteJointCreate(getPhysics(), 
+	//PxFixedJoint* j = PxFixedJointCreate(getPhysics(), 
+	PxSphericalJoint* j = PxSphericalJointCreate(getPhysics(), 
+		actor1, PxTransform(PxVec3(0,0, plankDepth)*scale),
+		actor2, PxTransform(PxVec3(0,0,-plankDepth)*scale));
+	if(j)
+		j->setProjectionLinearTolerance(.5f);
+
 }
+
+
+PxRigidDynamic*	createJointSphere(const PxVec3& pos, PxReal radius, const PxVec3* linVel, 
+	RenderMaterial* material, PxReal density )
+{
+
+
+	return NULL;
+}
+
 
 void SampleHelloWorld::collectInputEvents(std::vector<const SampleFramework::InputEvent*>& inputEvents)
 {

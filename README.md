@@ -1,7 +1,7 @@
 PhysXPractice
 =============
 
-NVIDIA PhysX 3.2.4 Practice Project 
+NVIDIA PhysX Practice Project using PhysX 3.3.0 Beta Library
 
 #### configure setting
 * PHSX_DIR = NVIDIA PhysX Library Directory
