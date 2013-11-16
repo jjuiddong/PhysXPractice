@@ -349,10 +349,17 @@ class PhysXSampleApplication :	public SampleFramework::SampleApplication, public
 #define SAMPLE_STARTER(className)	className##Starter
 
 #define SAMPLE_CREATOR_VAR(className)	g##className##creator
+	
+
+
+// modify jjuiddong, 2013-11-16
+// allocate general memory
+// not using allocator
+//return SAMPLE_NEW(className)(app);
 
 #define REGISTER_SAMPLE(className, fullPath)													\
 	static PhysXSample* SAMPLE_CREATOR(className)(PhysXSampleApplication& app) {				\
-		return SAMPLE_NEW(className)(app);														\
+		return new (className)(app);\
 	}																							\
 	static SampleFunctionCreator SAMPLE_CREATOR_VAR(className)(SAMPLE_CREATOR(className));		\
 	struct SAMPLE_STARTER(className) {															\
