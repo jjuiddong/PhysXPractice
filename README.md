@@ -3,7 +3,7 @@ PhysXPractice
 
 NVIDIA PhysX Practice Project using PhysX 3.3.0 Beta Library
 
-#### configure setting
+#### 'Path' environment setting
 * PHYSX_DIR = NVIDIA PhysX Library Directory
 
 Notebook windows7 64bit OS error nvcuda.dll
