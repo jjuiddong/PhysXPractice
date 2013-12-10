@@ -1197,6 +1197,13 @@ RenderMaterial* PhysXSample::getMaterial(PxU32 materialID)
 	return NULL;
 }
 
+RenderMaterial* PhysXSample::getManageMaterial(PxU32 materialID)
+{
+	if (MATERIAL_COUNT <= materialID)
+		return NULL;
+	return mManagedMaterials[materialID];
+}
+
 Stepper* PhysXSample::getStepper()
 {
 	switch(mStepperType)

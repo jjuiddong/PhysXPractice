@@ -6,11 +6,11 @@ InputMapping
 		}
 	UserInputCS
 		{
-		7411463;
+		7412438;
 		}
 	InputEventCS
 		{
-		3606233;
+		4262198;
 		}
 	Map
 		{
@@ -79,6 +79,11 @@ InputMapping
 		}
 	Map
 		{
+		KEY_SPACE;
+		PICKUP;
+		}
+	Map
+		{
 		KEY_1;
 		SPAWN_DEBUG_OBJECT;
 		}
@@ -86,6 +91,51 @@ InputMapping
 		{
 		GAMEPAD_NORTH;
 		SPAWN_DEBUG_OBJECT;
+		}
+	Map
+		{
+		KEY_2;
+		SPAWN_DEBUG_OBJECT2;
+		}
+	Map
+		{
+		KEY_3;
+		SPAWN_DEBUG_OBJECT3;
+		}
+	Map
+		{
+		KEY_4;
+		SPAWN_DEBUG_OBJECT4;
+		}
+	Map
+		{
+		KEY_5;
+		SPAWN_DEBUG_OBJECT5;
+		}
+	Map
+		{
+		KEY_6;
+		SPAWN_DEBUG_OBJECT6;
+		}
+	Map
+		{
+		KEY_7;
+		SPAWN_DEBUG_OBJECT7;
+		}
+	Map
+		{
+		KEY_8;
+		SPAWN_DEBUG_OBJECT8;
+		}
+	Map
+		{
+		KEY_9;
+		SPAWN_DEBUG_OBJECT9;
+		}
+	Map
+		{
+		KEY_0;
+		SPAWN_DEBUG_OBJECT0;
 		}
 	Map
 		{
