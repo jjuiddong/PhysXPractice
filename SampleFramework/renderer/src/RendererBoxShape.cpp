@@ -121,9 +121,15 @@ RendererShape(renderer)
 				const BoxFace &bf = g_BoxFaces[i];
 				for(PxU32 j=0; j<4; j++)
 				{
-					PxVec3 &p  = *(PxVec3*)positions; positions = ((PxU8*)positions) + positionStride;
-					PxVec3 &n  = *(PxVec3*)normals;   normals   = ((PxU8*)normals)   + normalStride;
-					PxF32 *uv  =  (PxF32*)uvs;        uvs       = ((PxU8*)uvs)       + uvStride;
+					PxVec3 &p  = *(PxVec3*)positions; 
+					positions = ((PxU8*)positions) + positionStride;
+					
+					PxVec3 &n  = *(PxVec3*)normals;   
+					normals   = ((PxU8*)normals)   + normalStride;
+					
+					PxF32 *uv  =  (PxF32*)uvs;        
+					uvs       = ((PxU8*)uvs)       + uvStride;
+					
 					n = bf.normal;
 					p = bf.positions[j] * extents;
 					if(userUVs)

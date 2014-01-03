@@ -4,10 +4,27 @@
     <ClCompile Include="..\..\main.cpp" />
     <ClCompile Include="..\..\SampleHelloWorld.cpp" />
     <ClCompile Include="..\..\stdafx.cpp" />
+    <ClCompile Include="..\..\RenderComposition.cpp">
+      <Filter>RenderTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\RenderCompositionShape.cpp">
+      <Filter>RenderTest</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\SampleHelloWorld.h" />
     <ClInclude Include="..\..\stdafx.h" />
     <ClInclude Include="..\..\targetver.h" />
+    <ClInclude Include="..\..\RenderComposition.h">
+      <Filter>RenderTest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\RenderCompositionShape.h">
+      <Filter>RenderTest</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="RenderTest">
+      <UniqueIdentifier>{d60b9949-26e8-4cdb-92d9-394a7a083112}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

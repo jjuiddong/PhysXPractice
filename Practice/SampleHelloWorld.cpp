@@ -13,6 +13,9 @@
 #include "PxShape.h"
 #include "PxPhysicsAPI.h"
 #include "RenderBoxActor.h"
+#include "RendererShape.h"
+#include "RenderComposition.h"
+
 
 #include <SampleBaseInputEventIds.h>
 #include <SamplePlatform.h>
@@ -1225,6 +1228,178 @@ bool SampleHelloWorld::GenerateHuman8(const bool flag)
 
 /**
  @brief 
+ @date 2014-01-02
+*/
+bool SampleHelloWorld::GenerateHuman9(const bool flag)
+{
+	const PxVec3 pos = getCamera().getPos() + (getCamera().getViewDir()*10.f) + PxVec3(0,-2.5f,0);
+	const PxVec3 vel = getCamera().getViewDir() * 20.f;
+	PxVec3 dims(0.3f,0.3f,0.1f);
+	PxRigidDynamic* box = createBox(pos, PxVec3(0.3f,0.3f,0.1f), NULL, getManageMaterial(MATERIAL_YELLOW), 1.f);
+	PxRigidDynamic* box2 = createBox(pos+PxVec3(1,0,0), PxVec3(0.3f,0.3f,0.1f), NULL, getManageMaterial(MATERIAL_YELLOW), 1.f);
+
+	//PxSceneWriteLock scopedLock(*mScene);
+
+	//// box1
+	//PxRigidDynamic* box = PxCreateDynamic(*mPhysics, PxTransform(pos), 
+	//	PxBoxGeometry(dims), *mMaterial, 1);
+	//PX_ASSERT(box);
+
+	////SetupDefaultRigidDynamic(*box);
+	//box->setActorFlag(PxActorFlag::eVISUALIZATION, true);
+	//box->setAngularDamping(0.5f);
+	//box->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, false);
+
+	//mScene->addActor(*box);
+	//addPhysicsActors(box);
+
+
+	//// box2
+	//PxRigidDynamic* box2 = PxCreateDynamic(*mPhysics, PxTransform(pos+PxVec3(1,0,0)), 
+	//	PxBoxGeometry(dims), *mMaterial, 1);
+	//PX_ASSERT(box2);
+
+	////SetupDefaultRigidDynamic(*box);
+	//box->setActorFlag(PxActorFlag::eVISUALIZATION, true);
+	//box->setAngularDamping(0.5f);
+	//box->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, false);
+
+	//mScene->addActor(*box2);
+	//addPhysicsActors(box2);
+
+
+	//list<PxVec3> verts;
+	//list<PxU32> indices;
+	//GetVerticesIndiceBufferFromRigidActor(box, verts, indices);
+	createRenderCompositionFromActor(box, box2, NULL);
+
+	return true;
+}
+
+
+/**
+ @brief 
+ @date 2014-01-02
+*/
+void SampleHelloWorld::createRenderCompositionFromActor(PxRigidActor* rigidActor0, PxRigidActor* rigidActor1, RenderMaterial* material)
+{
+	PX_ASSERT(rigidActor0);
+
+	PxU32 nbShapes0 = rigidActor0->getNbShapes();
+	if(!nbShapes0)
+		return;
+	PxU32 nbShapes1 = rigidActor1->getNbShapes();
+	if(!nbShapes1)
+		return;
+
+	Renderer& renderer = *getRenderer();
+
+	PxShape** shapes0 = (PxShape**)SAMPLE_ALLOC(sizeof(PxShape*)*nbShapes0);
+	PxU32 nb0 = rigidActor0->getShapes(shapes0, nbShapes0);
+	PX_ASSERT(nb0==nbShapes0);
+
+	PxShape** shapes1 = (PxShape**)SAMPLE_ALLOC(sizeof(PxShape*)*nbShapes1);
+	PxU32 nb1 = rigidActor1->getShapes(shapes1, nbShapes1);
+	PX_ASSERT(nb1==nbShapes1);
+
+	RenderBaseActor *renderActor0 = getRenderActor(rigidActor0, shapes0[ 0]);
+	RenderBaseActor *renderActor1 = getRenderActor(rigidActor1, shapes1[ 0]);
+
+	if (renderActor0 && renderActor1)
+	{
+		RenderBaseActor* shapeRenderActor = SAMPLE_NEW(RenderComposition)(renderer, 
+			renderActor0->getRenderShape(), PxTransform(), renderActor1->getRenderShape(), PxTransform() );
+
+		if(shapeRenderActor)
+		{
+			//link(shapeRenderActor, shape, actor);
+			mRenderActors.push_back(shapeRenderActor);
+			shapeRenderActor->setRenderMaterial(material);
+			shapeRenderActor->setEnableCameraCull(true);
+		}
+	}
+
+	
+
+
+
+	for(PxU32 i=0;i<nbShapes0;i++)
+	{
+		PxShape *shape = shapes0[ i];
+		PxRigidActor *actor = rigidActor0;
+		PxVec3 pos0 = rigidActor0->getGlobalPose().p;
+		PxVec3 pos1 = rigidActor1->getGlobalPose().p;
+
+		//RenderBaseActor* shapeRenderActor = SAMPLE_NEW(RenderComposition)(renderer, 
+		//	pos0, PxVec3(0.3f, 0.3f, 0.3f), PxVec3(1,0,0), PxVec3(0.3f, 0.3f, 0.3f) );
+		//RenderBaseActor* shapeRenderActor = SAMPLE_NEW(RenderComposition)(renderer, 
+		//	rigidActor0, PxTransform(), rigidActor1, PxTransform() );
+
+		//if(shapeRenderActor)
+		//{
+		//	link(shapeRenderActor, shape, actor);
+		//	mRenderActors.push_back(shapeRenderActor);
+		//	shapeRenderActor->setRenderMaterial(material);
+		//	shapeRenderActor->setEnableCameraCull(true);
+		//}
+	}
+
+	SAMPLE_FREE(shapes0);
+	SAMPLE_FREE(shapes1);
+}
+
+
+/**
+ @brief 
+ @date 2014-01-02
+*/
+void SampleHelloWorld::GetVerticesIndiceBufferFromRigidActor(PxRigidActor *rigidActor, 
+	OUT list<PxVec3> &verts, OUT list<PxU32> &indices)
+{
+	PxU32 nbShapes = rigidActor->getNbShapes();
+	if(!nbShapes)
+		return;
+
+	PxShape** shapes = (PxShape**)SAMPLE_ALLOC(sizeof(PxShape*)*nbShapes);
+	PxU32 nb = rigidActor->getShapes(shapes, nbShapes);
+	PX_ASSERT(nb==nbShapes);
+	for(PxU32 i=0;i<nbShapes;i++)
+	{
+		GetVerticesIndiceBufferFromShape(rigidActor, shapes[i], verts, indices);
+	}
+	SAMPLE_FREE(shapes);
+}
+
+
+/**
+ @brief 
+ @date 2014-01-02
+*/
+void SampleHelloWorld::GetVerticesIndiceBufferFromShape(PxRigidActor* actor, PxShape* shape, 
+	OUT list<PxVec3> &verts, OUT list<PxU32> &indices)
+{
+	using namespace SampleRenderer;
+	RenderBaseActor *renderActor = getRenderActor(actor, shape);
+	if (!renderActor)
+		return;
+
+	RendererShape *renderShape = renderActor->getRenderShape();
+	if (!renderShape)
+		return;
+
+	RendererMesh *mesh = renderShape->getMesh();
+	if (!mesh)
+		return;
+
+
+
+	
+
+}
+
+
+/**
+ @brief 
  @date 2013-12-05
 */
 void SampleHelloWorld::setCollisionGroup(PxRigidActor* actor, PxU32 group)
@@ -1265,8 +1440,11 @@ void SampleHelloWorld::onDigitalInputEvent(const SampleFramework::InputEvent&ie 
 		case SPAWN_DEBUG_OBJECT7:
 		case SPAWN_DEBUG_OBJECT8:
 		case SPAWN_DEBUG_OBJECT9:
-		case SPAWN_DEBUG_OBJECT0:
 			spawnNode(ie.m_Id);
+			break;
+
+		case SPAWN_DEBUG_OBJECT0:
+			spawnDebugObject();
 			break;
 
 		case PICKUP:
@@ -1294,7 +1472,7 @@ void SampleHelloWorld::spawnNode(const int key)
 	case SPAWN_DEBUG_OBJECT6: GenerateHuman6(m_applyJoint); break;
 	case SPAWN_DEBUG_OBJECT7: GenerateHuman7(m_applyJoint); break;
 	case SPAWN_DEBUG_OBJECT8: GenerateHuman8(m_applyJoint); break;
-	//case SPAWN_DEBUG_OBJECT9: GenerateHuman9(m_applyJoint); break;
+	case SPAWN_DEBUG_OBJECT9: GenerateHuman9(m_applyJoint); break;
 	//case SPAWN_DEBUG_OBJECT0: GenerateByGenotype("genotype.txt"); break;
 	}
 }

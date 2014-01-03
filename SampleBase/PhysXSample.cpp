@@ -208,7 +208,8 @@ static PxConvexMesh* GenerateConvex(PxPhysics& sdk, PxCooking& cooking, PxU32 nb
 			recentered[i] = verts[i] - center;
 	}
 
-	PxConvexMesh* convexMesh = PxToolkit::createConvexMesh(sdk, cooking, recenterVerts ? tmp : verts, nbVerts, PxConvexFlag::eCOMPUTE_CONVEX);
+	PxConvexMesh* convexMesh = PxToolkit::createConvexMesh(sdk, cooking, recenterVerts ? tmp : verts, nbVerts, 
+		PxConvexFlag::eCOMPUTE_CONVEX);
 
 	DELETEARRAY(tmp);
 
@@ -248,25 +249,25 @@ static PxConvexMesh* GenerateConvex(PxPhysics& sdk, PxCooking& cooking, float sc
 	return convexMesh;
 }
 
-#if 0
-
-static PxConvexMesh* GenerateConvex(PxPhysics& sdk, PxCooking& cooking, int nbInsideCirclePts, int nbOutsideCirclePts, float scale0, float scale1, float z)
-{
-	const int nbVerts = nbInsideCirclePts + nbOutsideCirclePts;
-	
-	// Generate random vertices
-	PxVec3Alloc* verts = SAMPLE_NEW(PxVec3Alloc)[nbVerts];
-	
-	GenerateCirclePts(nbInsideCirclePts, verts, scale0, 0.0f);
-	GenerateCirclePts(nbOutsideCirclePts, verts+nbInsideCirclePts, scale1, z);
-
-	PxConvexMesh* convexMesh = GenerateConvex(sdk, cooking, nbVerts, verts);
-
-	DELETEARRAY(verts);
-	return convexMesh;
-}
-
-#endif
+//#if 0
+//
+//static PxConvexMesh* GenerateConvex(PxPhysics& sdk, PxCooking& cooking, int nbInsideCirclePts, int nbOutsideCirclePts, float scale0, float scale1, float z)
+//{
+//	const int nbVerts = nbInsideCirclePts + nbOutsideCirclePts;
+//	
+//	// Generate random vertices
+//	PxVec3Alloc* verts = SAMPLE_NEW(PxVec3Alloc)[nbVerts];
+//	
+//	GenerateCirclePts(nbInsideCirclePts, verts, scale0, 0.0f);
+//	GenerateCirclePts(nbOutsideCirclePts, verts+nbInsideCirclePts, scale1, z);
+//
+//	PxConvexMesh* convexMesh = GenerateConvex(sdk, cooking, nbVerts, verts);
+//
+//	DELETEARRAY(verts);
+//	return convexMesh;
+//}
+//
+//#endif
 
 static PxRigidDynamic* GenerateCompound(PxPhysics& sdk, PxScene* scene, PxMaterial* defaultMat, const PxVec3& pos, const PxQuat& rot, const std::vector<PxTransform>& poses, const std::vector<const PxGeometry*>& geometries, bool kinematic=false, PxReal density = 1.0f)
 {
