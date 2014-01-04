@@ -33,6 +33,10 @@ namespace SampleRenderer
 			RendererShape *shape1, const PxTransform &tm1, 
 			const int additionalVtxBuffSize, const int additionalIdxBuffSize );
 
+		void GenerateTriangleFrom4Vector( void *positions, PxU32 positionStride, 
+			void *normals, PxU32 normalStride, PxU32 startVtxIdx, 
+			PxU16 *indices, PxU32 startIndexIdx,
+			const PxVec3 &center, PxVec3 v0, PxVec3 v1, PxVec3 v2, PxVec3 v3 );
 
 
 	private:
