@@ -16,8 +16,10 @@
 #include <list>
 #include <vector>
 #include <string>
+#include <set>
 
 
 using std::list;
 using std::vector;
 using std::string;
+using std::set;

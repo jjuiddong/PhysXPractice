@@ -1,7 +1,6 @@
 /**
  @filename RenderCompositionShape.h
  
- 
 */
 #pragma once
 
@@ -38,6 +37,42 @@ namespace SampleRenderer
 			PxU16 *indices, PxU32 startIndexIdx,
 			const PxVec3 &center, PxVec3 v0, PxVec3 v1, PxVec3 v2, PxVec3 v3 );
 
+		void FindMostCloseFace( 
+			void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
+			PxU16 *indices0, PxU32 idx0Size,
+			void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
+			PxU16 *indices1, PxU32 idx1Size,
+			OUT std::pair<int,int> &closeFace0, OUT std::pair<int,int> &closeFace1,
+			OUT set<PxU16> &vtx0, OUT set<PxU16> &vtx1 );
+
+		void GenerateBoxFromCloseFaceIdx(
+			std::pair<int,int> closeFace,
+			PxVec3 center,
+			void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
+			PxU16 *indices0, PxU32 idx0Size,
+			void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
+			PxU16 *indices1, PxU32 idx1Size,
+			void *positions, PxU32 positionStride, PxU32 startVtxIdx,
+			void *normals, PxU32 normalStride, 
+			PxU16 *indices, PxU32 startIndexIdx );
+
+		void GenerateBoxFromCloseVertex(
+			const set<PxU16> &vtxIdx0, const set<PxU16> &vtxIdx1,
+			PxVec3 center,
+			void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
+			PxU16 *indices0, PxU32 idx0Size,
+			void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
+			PxU16 *indices1, PxU32 idx1Size,
+			void *positions, PxU32 positionStride, PxU32 startVtxIdx,
+			void *normals, PxU32 normalStride, 
+			PxU16 *indices, PxU32 startIndexIdx );
+
+		void CalculateCenterPoint( std::pair<int,int> closeFace0, std::pair<int,int> closeFace1,
+			void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
+			PxU16 *indices0, PxU32 idx0Size,
+			void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
+			PxU16 *indices1, PxU32 idx1Size,
+			OUT PxVec3 &out );
 
 	private:
 		RendererVertexBuffer *m_vertexBuffer;

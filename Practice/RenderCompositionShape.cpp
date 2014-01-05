@@ -14,6 +14,8 @@
 #include <RendererMeshDesc.h>
 
 #include <RendererMemoryMacros.h>
+#include <boost/foreach.hpp>
+
 
 using namespace SampleRenderer;
 
@@ -221,7 +223,7 @@ RendererCompositionShape::RendererCompositionShape(Renderer &renderer,
 	const PxReal* uvs0) :
 	RendererShape(renderer)
 {
-	GenerateCompositionShape(shape0, tm0, shape1, tm1, 18, 18);
+	GenerateCompositionShape(shape0, tm0, shape1, tm1, 24, 24);
 
 	RendererMesh *mesh0 = shape0->getMesh();
 	RendererMesh *mesh1 = shape1->getMesh();
@@ -246,168 +248,59 @@ RendererCompositionShape::RendererCompositionShape(Renderer &renderer,
 	void *positions1 = vtx1[ 0]->lockSemantic(RendererVertexBuffer::SEMANTIC_POSITION, positionStride1);
 	PxU32 normalStride1 = 0;
 	void *normals1 = vtx1[ 0]->lockSemantic(RendererVertexBuffer::SEMANTIC_NORMAL, normalStride1);
-
+	
+	const PxU32 idx0Size = idx0->getMaxIndices();
+	const PxU32 idx1Size = idx1->getMaxIndices();
 	PxU16 *indices0 = (PxU16*)idx0->lock();
 	PxU16 *indices1 = (PxU16*)idx1->lock();
-	PxU32 idx0Size = idx0->getMaxIndices();
-	PxU32 idx1Size = idx1->getMaxIndices();
-
-	const PxU32 numVtx0 = vtx0[0]->getMaxVertices();
-	const PxU32 numVtx1 = vtx1[0]->getMaxVertices();
 
 	if (indices0 && positions0 && normals0 && indices1 && positions1 && normals1)
 	{
-		float minLen = 100000.f;
-		int minFaceIdx0 = -1;
-		int minFaceIdx1 = -1;
+		set<PxU16> vtxIdx0, vtxIdx1; 
+		std::pair<int,int> mostCloseFace0, mostCloseFace1;
+		FindMostCloseFace(positions0, positionStride0, normals0, normalStride0, indices0, idx0Size,
+			positions1, positionStride1, normals1, normalStride1, indices1, idx1Size,
+			mostCloseFace0, mostCloseFace1, vtxIdx0, vtxIdx1);
 
-		// find most close 2 face
-		for (PxU8 i=0; i<idx0Size; i+=3)
-		{
-			PxVec3 center0;
-			PxVec3 center0Normal;
-			{
-				const PxU16 vidx0 = indices0[ i];
-				const PxU16 vidx1 = indices0[ i+1];
-				const PxU16 vidx2 = indices0[ i+2];
+		// generate vertex buffer
+		PxU32 positionStride = 0;
+		void *positions = m_vertexBuffer->lockSemantic(RendererVertexBuffer::SEMANTIC_POSITION, positionStride);
+		PxU32 normalStride = 0;
+		void *normals = m_vertexBuffer->lockSemantic(RendererVertexBuffer::SEMANTIC_NORMAL, normalStride);
+		PxU32 uvStride = 0;
+		void *uvs = m_vertexBuffer->lockSemantic(RendererVertexBuffer::SEMANTIC_TEXCOORD0, uvStride);
 
-				PxVec3 &p0 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx0));
-				PxVec3 &p1 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx1));
-				PxVec3 &p2 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx2));
+		PxU16 *indices = (PxU16*)m_indexBuffer->lock();
+		const PxU32 numVtx0 = vtx0[0]->getMaxVertices();
+		const PxU32 numVtx1 = vtx1[0]->getMaxVertices();
+		PxU32 startIndexIdx = idx0Size + idx1Size;
+		PxU32 startVtxIdx = numVtx0 + numVtx1;
 
-				PxVec3 &n0 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx0));
-				PxVec3 &n1 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx1));
-				PxVec3 &n2 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx2));
+		PxVec3 center;
+		CalculateCenterPoint( mostCloseFace0, mostCloseFace1,
+			positions0, positionStride0, normals0, normalStride0, indices0, idx0Size,
+			positions1, positionStride1, normals1, normalStride1, indices1, idx1Size,
+			center );
 
-				center0 = p0 + p1 + p2;
-				center0 /= 3.f;
+		GenerateBoxFromCloseVertex( vtxIdx0, vtxIdx1, center,
+			positions0, positionStride0, normals0, normalStride0, indices0, idx0Size,
+			positions1, positionStride1, normals1, normalStride1, indices1, idx1Size,
+			positions, positionStride, startVtxIdx, normals, normalStride, indices, startIndexIdx );
 
-				center0Normal = n0;
-			}
+		//GenerateBoxFromCloseFaceIdx( mostCloseFace0, center,
+		//	positions0, positionStride0, normals0, normalStride0, indices0, idx0Size,
+		//	positions1, positionStride1, normals1, normalStride1, indices1, idx1Size,
+		//	positions, positionStride, startVtxIdx, normals, normalStride, indices, startIndexIdx );
 
-			for (PxU8 k=0; k<idx1Size; k+=3)
-			{
-				PxVec3 center1;
-				PxVec3 center1Normal;
-				{
-					const PxU16 vidx0 = indices1[ k];
-					const PxU16 vidx1 = indices1[ k+1];
-					const PxU16 vidx2 = indices1[ k+2];
+		//GenerateBoxFromCloseFaceIdx(mostCloseFace1, center,
+		//	positions0, positionStride0, normals0, normalStride0, indices0, idx0Size,
+		//	positions1, positionStride1, normals1, normalStride1, indices1, idx1Size,
+		//	positions, positionStride, startVtxIdx+18, normals, normalStride, indices, startIndexIdx+18 );
 
-					PxVec3 &p0 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx0)) + PxVec3(1,0,0);
-					PxVec3 &p1 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx1)) + PxVec3(1,0,0);
-					PxVec3 &p2 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx2)) + PxVec3(1,0,0);
-
-					PxVec3 &n0 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx0));
-					PxVec3 &n1 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx1));
-					PxVec3 &n2 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx2));
-
-					center1 = p0 + p1 + p2;
-					center1 /= 3.f;
-
-					center1Normal = n0;
-				}
-
-				PxVec3 len = center0 - center1;
-				if ((minLen > len.magnitude()) && (center0Normal.dot(center1Normal) < 0) )
-				{
-					minFaceIdx0 = i;
-					minFaceIdx1 = k;
-					minLen = len.magnitude();	
-				}
-			}
-		}
-
-		// gen face
-		if (minFaceIdx0 >= 0)
-		{
-			const PxU16 vidx00 = indices0[ minFaceIdx0];
-			const PxU16 vidx01 = indices0[ minFaceIdx0+1];
-			const PxU16 vidx02 = indices0[ minFaceIdx0+2];
-
-			PxVec3 &p00 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx00));
-			PxVec3 &p01 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx01));
-			PxVec3 &p02 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx02));
-
-			PxVec3 &n00 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx00));
-			PxVec3 &n01 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx01));
-			PxVec3 &n02 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx02));
-
-			const PxU16 vidx10 = indices1[ minFaceIdx1];
-			const PxU16 vidx11 = indices1[ minFaceIdx1+1];
-			const PxU16 vidx12 = indices1[ minFaceIdx1+2];
-
-			PxVec3 &p10 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx10)) +  PxVec3(1,0,0);
-			PxVec3 &p11 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx11)) +  PxVec3(1,0,0);
-			PxVec3 &p12 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx12)) +  PxVec3(1,0,0);
-
-			PxVec3 &n10 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx10));
-			PxVec3 &n11 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx11));
-			PxVec3 &n12 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx12));
-
-			vector<PxVec3> v0;
-			v0.push_back(p00);
-			v0.push_back(p01);
-			v0.push_back(p02);
-
-			vector<PxVec3> v1;
-			v1.push_back(p10);
-			v1.push_back(p11);
-			v1.push_back(p12);
-
-			vector<int> line(3);
-			for (unsigned int i=0; i < v0.size(); ++i)
-			{
-				float minLen = 10000;
-				for (unsigned int k=0; k < v1.size(); ++k)
-				{
-					PxVec3 v = v0[ i] - v1[ k];
-					const float len = v.magnitude();
-					if (minLen > len)
-					{
-						line[ i] = k;
-						minLen = len;
-					}
-				}
-			}
-
-
-			// generate vertex buffer
-		 	PxU32 positionStride = 0;
-			void *positions = m_vertexBuffer->lockSemantic(RendererVertexBuffer::SEMANTIC_POSITION, positionStride);
-			PxU32 normalStride = 0;
-			void *normals = m_vertexBuffer->lockSemantic(RendererVertexBuffer::SEMANTIC_NORMAL, normalStride);
-			PxU32 uvStride = 0;
-			void *uvs = m_vertexBuffer->lockSemantic(RendererVertexBuffer::SEMANTIC_TEXCOORD0, uvStride);
-
-			PxVec3 center = p00 + p01 + p02 + p10 + p11 + p12;
-			center /= 6.f;
-
-			PxU16 *indices = (PxU16*)m_indexBuffer->lock();
-			PxU32 idxSize = m_indexBuffer->getMaxIndices();
-			PxU32 startIndexIdx = idx0Size + idx1Size;
-			PxU32 startVtxIdx = numVtx0 + numVtx1;
-
-			GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
-				center, v0[ 0], v0[ 1], v1[ line[ 0]], v1[ line[ 1]] );
-			startVtxIdx += 6;
-			startIndexIdx += 6;
-
-			GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
-				center, v0[ 0], v0[ 2], v1[ line[ 0]], v1[ line[ 2]] );
-			startVtxIdx += 6;
-			startIndexIdx += 6;
-
-			GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
-				center, v0[ 1], v0[ 2], v1[ line[ 1]], v1[ line[ 2]] );
-			startVtxIdx += 6;
-			startIndexIdx += 6;
-
-			m_indexBuffer->unlock();
-			m_vertexBuffer->unlockSemantic(RendererVertexBuffer::SEMANTIC_NORMAL);
-			m_vertexBuffer->unlockSemantic(RendererVertexBuffer::SEMANTIC_POSITION);
-			m_vertexBuffer->unlockSemantic(RendererVertexBuffer::SEMANTIC_TEXCOORD0);
-		}
+		m_indexBuffer->unlock();
+		m_vertexBuffer->unlockSemantic(RendererVertexBuffer::SEMANTIC_NORMAL);
+		m_vertexBuffer->unlockSemantic(RendererVertexBuffer::SEMANTIC_POSITION);
+		m_vertexBuffer->unlockSemantic(RendererVertexBuffer::SEMANTIC_TEXCOORD0);
 	}
 
 
@@ -418,6 +311,166 @@ RendererCompositionShape::RendererCompositionShape(Renderer &renderer,
 	vtx1[ 0]->unlockSemantic(RendererVertexBuffer::SEMANTIC_NORMAL);
 	vtx1[ 0]->unlockSemantic(RendererVertexBuffer::SEMANTIC_POSITION);
 
+}
+
+
+/**
+ @brief 
+ @date 2014-01-05
+*/
+void RendererCompositionShape::CalculateCenterPoint( std::pair<int,int> closeFace0, std::pair<int,int> closeFace1,
+	void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
+	PxU16 *indices0, PxU32 idx0Size,
+	void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
+	PxU16 *indices1, PxU32 idx1Size,
+	OUT PxVec3 &out )
+{
+	PxVec3 center;
+	{
+		int minFaceIdx0 = closeFace0.first;
+		int minFaceIdx1 = closeFace0.second;
+
+		const PxU16 vidx00 = indices0[ minFaceIdx0];
+		const PxU16 vidx01 = indices0[ minFaceIdx0+1];
+		const PxU16 vidx02 = indices0[ minFaceIdx0+2];
+
+		PxVec3 &p00 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx00));
+		PxVec3 &p01 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx01));
+		PxVec3 &p02 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx02));
+
+		PxVec3 &n00 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx00));
+		PxVec3 &n01 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx01));
+		PxVec3 &n02 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx02));
+
+		const PxU16 vidx10 = indices1[ minFaceIdx1];
+		const PxU16 vidx11 = indices1[ minFaceIdx1+1];
+		const PxU16 vidx12 = indices1[ minFaceIdx1+2];
+
+		PxVec3 &p10 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx10)) +  PxVec3(1,0,0);
+		PxVec3 &p11 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx11)) +  PxVec3(1,0,0);
+		PxVec3 &p12 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx12)) +  PxVec3(1,0,0);
+
+		center += (p00 +p01 + p02 + p10 + p11 + p12);
+	}
+
+	{
+		int minFaceIdx0 = closeFace1.first;
+		int minFaceIdx1 = closeFace1.second;
+
+		const PxU16 vidx00 = indices0[ minFaceIdx0];
+		const PxU16 vidx01 = indices0[ minFaceIdx0+1];
+		const PxU16 vidx02 = indices0[ minFaceIdx0+2];
+
+		PxVec3 &p00 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx00));
+		PxVec3 &p01 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx01));
+		PxVec3 &p02 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx02));
+
+		PxVec3 &n00 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx00));
+		PxVec3 &n01 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx01));
+		PxVec3 &n02 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx02));
+
+		const PxU16 vidx10 = indices1[ minFaceIdx1];
+		const PxU16 vidx11 = indices1[ minFaceIdx1+1];
+		const PxU16 vidx12 = indices1[ minFaceIdx1+2];
+
+		PxVec3 &p10 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx10)) +  PxVec3(1,0,0);
+		PxVec3 &p11 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx11)) +  PxVec3(1,0,0);
+		PxVec3 &p12 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx12)) +  PxVec3(1,0,0);
+
+		center += (p00 +p01 + p02 + p10 + p11 + p12);
+	}
+
+	center /= 12.f;
+	out = center;
+}
+
+
+/**
+ @brief 
+ @date 2014-01-05
+*/
+void RendererCompositionShape::GenerateBoxFromCloseFaceIdx(
+	std::pair<int,int> closeFace,
+	PxVec3 center,
+	void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
+	PxU16 *indices0, PxU32 idx0Size,
+	void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
+	PxU16 *indices1, PxU32 idx1Size,
+	void *positions, PxU32 positionStride, PxU32 startVtxIdx,
+	void *normals, PxU32 normalStride, 
+	PxU16 *indices, PxU32 startIndexIdx )
+{
+	int minFaceIdx0 = closeFace.first;
+	int minFaceIdx1 = closeFace.second;
+
+	// gen face
+	if (minFaceIdx0 >= 0)
+	{
+		const PxU16 vidx00 = indices0[ minFaceIdx0];
+		const PxU16 vidx01 = indices0[ minFaceIdx0+1];
+		const PxU16 vidx02 = indices0[ minFaceIdx0+2];
+
+		PxVec3 &p00 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx00));
+		PxVec3 &p01 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx01));
+		PxVec3 &p02 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx02));
+
+		PxVec3 &n00 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx00));
+		PxVec3 &n01 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx01));
+		PxVec3 &n02 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx02));
+
+		const PxU16 vidx10 = indices1[ minFaceIdx1];
+		const PxU16 vidx11 = indices1[ minFaceIdx1+1];
+		const PxU16 vidx12 = indices1[ minFaceIdx1+2];
+
+		PxVec3 &p10 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx10)) +  PxVec3(1,0,0);
+		PxVec3 &p11 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx11)) +  PxVec3(1,0,0);
+		PxVec3 &p12 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx12)) +  PxVec3(1,0,0);
+
+		PxVec3 &n10 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx10));
+		PxVec3 &n11 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx11));
+		PxVec3 &n12 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx12));
+
+		vector<PxVec3> v0;
+		v0.push_back(p00);
+		v0.push_back(p01);
+		v0.push_back(p02);
+
+		vector<PxVec3> v1;
+		v1.push_back(p10);
+		v1.push_back(p11);
+		v1.push_back(p12);
+
+		vector<int> line(3);
+		for (unsigned int i=0; i < v0.size(); ++i)
+		{
+			float minLen = 10000;
+			for (unsigned int k=0; k < v1.size(); ++k)
+			{
+				PxVec3 v = v0[ i] - v1[ k];
+				const float len = v.magnitude();
+				if (minLen > len)
+				{
+					line[ i] = k;
+					minLen = len;
+				}
+			}
+		}
+
+		GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
+			center, v0[ 0], v0[ 1], v1[ line[ 0]], v1[ line[ 1]] );
+		startVtxIdx += 6;
+		startIndexIdx += 6;
+
+		GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
+			center, v0[ 0], v0[ 2], v1[ line[ 0]], v1[ line[ 2]] );
+		startVtxIdx += 6;
+		startIndexIdx += 6;
+
+		GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
+			center, v0[ 1], v0[ 2], v1[ line[ 1]], v1[ line[ 2]] );
+		startVtxIdx += 6;
+		startIndexIdx += 6;
+	}
 }
 
 
@@ -696,3 +749,188 @@ void RendererCompositionShape::GenerateTriangleFrom4Vector( void *positions, PxU
 		indices[ startIndexIdx++] = face2VtxIdx+2;
 	}
 }
+
+
+/**
+ @brief 
+ @date 2014-01-05
+*/
+void RendererCompositionShape::FindMostCloseFace( 
+	void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
+	PxU16 *indices0, PxU32 idx0Size,
+	void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
+	PxU16 *indices1, PxU32 idx1Size,
+	OUT std::pair<int,int> &closeFace0, OUT std::pair<int,int> &closeFace1,
+	OUT set<PxU16> &vtx0, OUT set<PxU16> &vtx1 )
+{
+	int foundCount = 0;
+	set<int> checkV0, checkV1;
+
+	while (foundCount < 2)
+	{
+		float minLen = 100000.f;
+		int minFaceIdx0 = -1;
+		int minFaceIdx1 = -1;
+
+		// find most close face
+		for (PxU8 i=0; i<idx0Size; i+=3)
+		{
+			if (checkV0.find(i) != checkV0.end())
+				continue; // already exist face index
+
+			PxVec3 center0;
+			PxVec3 center0Normal;
+			{
+				const PxU16 vidx0 = indices0[ i];
+				const PxU16 vidx1 = indices0[ i+1];
+				const PxU16 vidx2 = indices0[ i+2];
+
+				PxVec3 &p0 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx0));
+				PxVec3 &p1 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx1));
+				PxVec3 &p2 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx2));
+
+				PxVec3 &n0 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx0));
+				PxVec3 &n1 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx1));
+				PxVec3 &n2 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx2));
+
+				center0 = p0 + p1 + p2;
+				center0 /= 3.f;
+
+				center0Normal = n0;
+			}
+
+			for (PxU8 k=0; k<idx1Size; k+=3)
+			{
+				if (checkV1.find(k) != checkV1.end())
+					continue; // already exist face index
+
+				PxVec3 center1;
+				PxVec3 center1Normal;
+				{
+					const PxU16 vidx0 = indices1[ k];
+					const PxU16 vidx1 = indices1[ k+1];
+					const PxU16 vidx2 = indices1[ k+2];
+
+					PxVec3 &p0 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx0)) + PxVec3(1,0,0);
+					PxVec3 &p1 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx1)) + PxVec3(1,0,0);
+					PxVec3 &p2 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx2)) + PxVec3(1,0,0);
+
+					PxVec3 &n0 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx0));
+					PxVec3 &n1 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx1));
+					PxVec3 &n2 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx2));
+
+					center1 = p0 + p1 + p2;
+					center1 /= 3.f;
+
+					center1Normal = n0;
+				}
+
+				PxVec3 len = center0 - center1;
+				if ((minLen > len.magnitude()) && (center0Normal.dot(center1Normal) < 0) )
+				{
+					minFaceIdx0 = i;
+					minFaceIdx1 = k;
+					minLen = len.magnitude();	
+				}
+			}
+		}
+
+		checkV0.insert(minFaceIdx0);
+		checkV1.insert(minFaceIdx1);
+
+		if (foundCount == 0)
+		{
+			closeFace0 = std::pair<int,int>(minFaceIdx0, minFaceIdx1);
+		}
+		else
+		{
+			closeFace1 = std::pair<int,int>(minFaceIdx0, minFaceIdx1);
+		}
+
+		++foundCount;
+	}
+
+
+	vtx0.insert( indices0[ closeFace0.first] );
+	vtx0.insert( indices0[ closeFace0.first+1] );
+	vtx0.insert( indices0[ closeFace0.first+2] );
+	vtx0.insert( indices0[ closeFace1.first] );
+	vtx0.insert( indices0[ closeFace1.first+1] );
+	vtx0.insert( indices0[ closeFace1.first+2] );
+
+	vtx1.insert( indices1[ closeFace0.second] );
+	vtx1.insert( indices1[ closeFace0.second+1] );
+	vtx1.insert( indices1[ closeFace0.second+2] );
+	vtx1.insert( indices1[ closeFace1.second] );
+	vtx1.insert( indices1[ closeFace1.second+1] );
+	vtx1.insert( indices1[ closeFace1.second+2] );
+}
+
+
+/**
+ @brief 
+ @date 2014-01-05
+*/
+void RendererCompositionShape::GenerateBoxFromCloseVertex(
+	const set<PxU16> &vtxIdx0, const set<PxU16> &vtxIdx1,
+	PxVec3 center,
+	void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
+	PxU16 *indices0, PxU32 idx0Size,
+	void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
+	PxU16 *indices1, PxU32 idx1Size,
+	void *positions, PxU32 positionStride, PxU32 startVtxIdx,
+	void *normals, PxU32 normalStride, 
+	PxU16 *indices, PxU32 startIndexIdx )
+{
+	// gen face
+	vector<PxVec3> v0, v1;
+	BOOST_FOREACH (const auto vidx, vtxIdx0)
+	{
+		PxVec3 &p = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx));
+		v0.push_back(p);
+	}
+
+	BOOST_FOREACH (auto vidx, vtxIdx1)
+	{
+		PxVec3 &p = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx)) + PxVec3(1,0,0);
+		v1.push_back(p);
+	}
+
+	vector<int> line(4);
+	for (unsigned int i=0; i < v0.size(); ++i)
+	{
+		float minLen = 10000;
+		for (unsigned int k=0; k < v1.size(); ++k)
+		{
+			PxVec3 v = v0[ i] - v1[ k];
+			const float len = v.magnitude();
+			if (minLen > len)
+			{
+				line[ i] = k;
+				minLen = len;
+			}
+		}
+	}
+
+	GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
+		center, v0[ 0], v0[ 1], v1[ line[ 0]], v1[ line[ 1]] );
+	startVtxIdx += 6;
+	startIndexIdx += 6;
+
+	GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
+		center, v0[ 1], v0[ 2], v1[ line[ 1]], v1[ line[ 2]] );
+	startVtxIdx += 6;
+	startIndexIdx += 6;
+
+	GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
+		center, v0[ 2], v0[ 3], v1[ line[ 2]], v1[ line[ 3]] );
+	startVtxIdx += 6;
+	startIndexIdx += 6;
+
+	GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
+		center, v0[ 3], v0[ 0], v1[ line[ 3]], v1[ line[ 0]] );
+	startVtxIdx += 6;
+	startIndexIdx += 6;
+
+}
+
