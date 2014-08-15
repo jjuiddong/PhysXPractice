@@ -1,7 +1,6 @@
 /**
  @filename RenderComposition.h
  
- 
 */
 #pragma once
 

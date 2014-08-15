@@ -1264,42 +1264,7 @@ bool SampleHelloWorld::GenerateHuman9(const bool flag)
 	PxVec3 dims(0.3f,0.3f,0.1f);
 	PxRigidDynamic* box = createBox(pos, PxVec3(0.3f,0.3f,0.1f), NULL, getManageMaterial(MATERIAL_YELLOW), 1.f);
 	PxRigidDynamic* box2 = createBox(pos+PxVec3(1,0,0), PxVec3(0.3f,0.3f,0.1f), NULL, getManageMaterial(MATERIAL_YELLOW), 1.f);
-
-	//PxSceneWriteLock scopedLock(*mScene);
-
-	//// box1
-	//PxRigidDynamic* box = PxCreateDynamic(*mPhysics, PxTransform(pos), 
-	//	PxBoxGeometry(dims), *mMaterial, 1);
-	//PX_ASSERT(box);
-
-	////SetupDefaultRigidDynamic(*box);
-	//box->setActorFlag(PxActorFlag::eVISUALIZATION, true);
-	//box->setAngularDamping(0.5f);
-	//box->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, false);
-
-	//mScene->addActor(*box);
-	//addPhysicsActors(box);
-
-
-	//// box2
-	//PxRigidDynamic* box2 = PxCreateDynamic(*mPhysics, PxTransform(pos+PxVec3(1,0,0)), 
-	//	PxBoxGeometry(dims), *mMaterial, 1);
-	//PX_ASSERT(box2);
-
-	////SetupDefaultRigidDynamic(*box);
-	//box->setActorFlag(PxActorFlag::eVISUALIZATION, true);
-	//box->setAngularDamping(0.5f);
-	//box->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, false);
-
-	//mScene->addActor(*box2);
-	//addPhysicsActors(box2);
-
-
-	//list<PxVec3> verts;
-	//list<PxU32> indices;
-	//GetVerticesIndiceBufferFromRigidActor(box, verts, indices);
 	createRenderCompositionFromActor(box, box2, NULL);
-
 	return true;
 }
 
@@ -1320,7 +1285,6 @@ void SampleHelloWorld::createRenderCompositionFromActor(PxRigidActor* rigidActor
 		return;
 
 	Renderer& renderer = *getRenderer();
-
 	PxShape** shapes0 = (PxShape**)SAMPLE_ALLOC(sizeof(PxShape*)*nbShapes0);
 	PxU32 nb0 = rigidActor0->getShapes(shapes0, nbShapes0);
 	PX_ASSERT(nb0==nbShapes0);
@@ -1346,82 +1310,8 @@ void SampleHelloWorld::createRenderCompositionFromActor(PxRigidActor* rigidActor
 		}
 	}
 
-	
-
-
-
-	for(PxU32 i=0;i<nbShapes0;i++)
-	{
-		PxShape *shape = shapes0[ i];
-		PxRigidActor *actor = rigidActor0;
-		PxVec3 pos0 = rigidActor0->getGlobalPose().p;
-		PxVec3 pos1 = rigidActor1->getGlobalPose().p;
-
-		//RenderBaseActor* shapeRenderActor = SAMPLE_NEW(RenderComposition)(renderer, 
-		//	pos0, PxVec3(0.3f, 0.3f, 0.3f), PxVec3(1,0,0), PxVec3(0.3f, 0.3f, 0.3f) );
-		//RenderBaseActor* shapeRenderActor = SAMPLE_NEW(RenderComposition)(renderer, 
-		//	rigidActor0, PxTransform(), rigidActor1, PxTransform() );
-
-		//if(shapeRenderActor)
-		//{
-		//	link(shapeRenderActor, shape, actor);
-		//	mRenderActors.push_back(shapeRenderActor);
-		//	shapeRenderActor->setRenderMaterial(material);
-		//	shapeRenderActor->setEnableCameraCull(true);
-		//}
-	}
-
 	SAMPLE_FREE(shapes0);
 	SAMPLE_FREE(shapes1);
-}
-
-
-/**
- @brief 
- @date 2014-01-02
-*/
-void SampleHelloWorld::GetVerticesIndiceBufferFromRigidActor(PxRigidActor *rigidActor, 
-	OUT list<PxVec3> &verts, OUT list<PxU32> &indices)
-{
-	PxU32 nbShapes = rigidActor->getNbShapes();
-	if(!nbShapes)
-		return;
-
-	PxShape** shapes = (PxShape**)SAMPLE_ALLOC(sizeof(PxShape*)*nbShapes);
-	PxU32 nb = rigidActor->getShapes(shapes, nbShapes);
-	PX_ASSERT(nb==nbShapes);
-	for(PxU32 i=0;i<nbShapes;i++)
-	{
-		GetVerticesIndiceBufferFromShape(rigidActor, shapes[i], verts, indices);
-	}
-	SAMPLE_FREE(shapes);
-}
-
-
-/**
- @brief 
- @date 2014-01-02
-*/
-void SampleHelloWorld::GetVerticesIndiceBufferFromShape(PxRigidActor* actor, PxShape* shape, 
-	OUT list<PxVec3> &verts, OUT list<PxU32> &indices)
-{
-	using namespace SampleRenderer;
-	RenderBaseActor *renderActor = getRenderActor(actor, shape);
-	if (!renderActor)
-		return;
-
-	RendererShape *renderShape = renderActor->getRenderShape();
-	if (!renderShape)
-		return;
-
-	RendererMesh *mesh = renderShape->getMesh();
-	if (!mesh)
-		return;
-
-
-
-	
-
 }
 
 

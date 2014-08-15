@@ -287,16 +287,6 @@ RendererCompositionShape::RendererCompositionShape(Renderer &renderer,
 			positions1, positionStride1, normals1, normalStride1, indices1, idx1Size,
 			positions, positionStride, startVtxIdx, normals, normalStride, indices, startIndexIdx );
 
-		//GenerateBoxFromCloseFaceIdx( mostCloseFace0, center,
-		//	positions0, positionStride0, normals0, normalStride0, indices0, idx0Size,
-		//	positions1, positionStride1, normals1, normalStride1, indices1, idx1Size,
-		//	positions, positionStride, startVtxIdx, normals, normalStride, indices, startIndexIdx );
-
-		//GenerateBoxFromCloseFaceIdx(mostCloseFace1, center,
-		//	positions0, positionStride0, normals0, normalStride0, indices0, idx0Size,
-		//	positions1, positionStride1, normals1, normalStride1, indices1, idx1Size,
-		//	positions, positionStride, startVtxIdx+18, normals, normalStride, indices, startIndexIdx+18 );
-
 		m_indexBuffer->unlock();
 		m_vertexBuffer->unlockSemantic(RendererVertexBuffer::SEMANTIC_NORMAL);
 		m_vertexBuffer->unlockSemantic(RendererVertexBuffer::SEMANTIC_POSITION);
@@ -382,95 +372,6 @@ void RendererCompositionShape::CalculateCenterPoint( std::pair<int,int> closeFac
 
 	center /= 12.f;
 	out = center;
-}
-
-
-/**
- @brief 
- @date 2014-01-05
-*/
-void RendererCompositionShape::GenerateBoxFromCloseFaceIdx(
-	std::pair<int,int> closeFace,
-	PxVec3 center,
-	void *positions0, PxU32 positionStride0, void *normals0, PxU32 normalStride0,
-	PxU16 *indices0, PxU32 idx0Size,
-	void *positions1, PxU32 positionStride1, void *normals1, PxU32 normalStride1,
-	PxU16 *indices1, PxU32 idx1Size,
-	void *positions, PxU32 positionStride, PxU32 startVtxIdx,
-	void *normals, PxU32 normalStride, 
-	PxU16 *indices, PxU32 startIndexIdx )
-{
-	int minFaceIdx0 = closeFace.first;
-	int minFaceIdx1 = closeFace.second;
-
-	// gen face
-	if (minFaceIdx0 >= 0)
-	{
-		const PxU16 vidx00 = indices0[ minFaceIdx0];
-		const PxU16 vidx01 = indices0[ minFaceIdx0+1];
-		const PxU16 vidx02 = indices0[ minFaceIdx0+2];
-
-		PxVec3 &p00 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx00));
-		PxVec3 &p01 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx01));
-		PxVec3 &p02 = *(PxVec3*)(((PxU8*)positions0) + (positionStride0 * vidx02));
-
-		PxVec3 &n00 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx00));
-		PxVec3 &n01 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx01));
-		PxVec3 &n02 = *(PxVec3*)(((PxU8*)normals0) + (normalStride0 * vidx02));
-
-		const PxU16 vidx10 = indices1[ minFaceIdx1];
-		const PxU16 vidx11 = indices1[ minFaceIdx1+1];
-		const PxU16 vidx12 = indices1[ minFaceIdx1+2];
-
-		PxVec3 &p10 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx10)) +  PxVec3(1,0,0);
-		PxVec3 &p11 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx11)) +  PxVec3(1,0,0);
-		PxVec3 &p12 = *(PxVec3*)(((PxU8*)positions1) + (positionStride1 * vidx12)) +  PxVec3(1,0,0);
-
-		PxVec3 &n10 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx10));
-		PxVec3 &n11 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx11));
-		PxVec3 &n12 = *(PxVec3*)(((PxU8*)normals1) + (normalStride1 * vidx12));
-
-		vector<PxVec3> v0;
-		v0.push_back(p00);
-		v0.push_back(p01);
-		v0.push_back(p02);
-
-		vector<PxVec3> v1;
-		v1.push_back(p10);
-		v1.push_back(p11);
-		v1.push_back(p12);
-
-		vector<int> line(3);
-		for (unsigned int i=0; i < v0.size(); ++i)
-		{
-			float minLen = 10000;
-			for (unsigned int k=0; k < v1.size(); ++k)
-			{
-				PxVec3 v = v0[ i] - v1[ k];
-				const float len = v.magnitude();
-				if (minLen > len)
-				{
-					line[ i] = k;
-					minLen = len;
-				}
-			}
-		}
-
-		GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
-			center, v0[ 0], v0[ 1], v1[ line[ 0]], v1[ line[ 1]] );
-		startVtxIdx += 6;
-		startIndexIdx += 6;
-
-		GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
-			center, v0[ 0], v0[ 2], v1[ line[ 0]], v1[ line[ 2]] );
-		startVtxIdx += 6;
-		startIndexIdx += 6;
-
-		GenerateTriangleFrom4Vector(positions, positionStride, normals, normalStride, startVtxIdx, indices, startIndexIdx,
-			center, v0[ 1], v0[ 2], v1[ line[ 1]], v1[ line[ 2]] );
-		startVtxIdx += 6;
-		startIndexIdx += 6;
-	}
 }
 
 

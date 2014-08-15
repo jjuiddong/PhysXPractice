@@ -44,8 +44,6 @@ protected:
 	PxRigidDynamic*	createJointSphere(const PxVec3& pos, PxReal radius, const PxVec3* linVel=NULL, 
 		RenderMaterial* material=NULL, PxReal density=1.0f);
 	void spawnNode(const int key);
-	void GetVerticesIndiceBufferFromRigidActor(PxRigidActor *rigidActor, OUT list<PxVec3> &verts, OUT list<PxU32> &indices);
-	void GetVerticesIndiceBufferFromShape(PxRigidActor* actor, PxShape* shape, OUT list<PxVec3> &verts, OUT list<PxU32> &indices);
 	void createRenderCompositionFromActor(PxRigidActor* rigidActor0, PxRigidActor* rigidActor1, RenderMaterial* material);
 
 
